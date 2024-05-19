@@ -9,7 +9,6 @@ import java.net.http.HttpResponse;
 public class ConsomeApi {
     public String obtemDados(String endereco){
         HttpClient client = HttpClient.newHttpClient();
-
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(endereco))
                 .build();
@@ -23,8 +22,6 @@ public class ConsomeApi {
             throw new RuntimeException(e);
         }
 
-        String json = response.body();
-
-        return json;
+        return response.body();
     }
 }
