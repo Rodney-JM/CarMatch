@@ -2,12 +2,16 @@ package com.JRMRod.carMatch.demo.principal;
 
 import com.JRMRod.carMatch.demo.modelos.Dados;
 import com.JRMRod.carMatch.demo.modelos.Modelos;
+import com.JRMRod.carMatch.demo.modelos.Veiculo;
 import com.JRMRod.carMatch.demo.services.ConsomeApi;
 import com.JRMRod.carMatch.demo.services.ConverteDados;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
     private Scanner in = new Scanner(System.in);
@@ -52,5 +56,36 @@ public class Principal {
                 .sorted(Comparator.comparing(Dados::codigo))
                 .map(e -> "Código: " + e.codigo() + " Nome: "+ e.nome() + "\n")
                 .forEach(System.out::println);
+
+        System.out.println("\nDigite um trecho do nome do carro a ser buscado");
+
+        var nomeVeiculo = in.nextLine();
+
+        List<Dados> modelosFiltrados = modeloLista.modelos().stream()
+                .filter(m -> m.nome().toLowerCase().contains(nomeVeiculo.toLowerCase()))
+                .collect(Collectors.toList());
+
+        System.out.println("Modelos filtrados: ");
+        modelosFiltrados.forEach(System.out::println);
+
+        System.out.println("Digite por favor o código do modelo para buscar os valores de avaliação");
+
+        var codigoModelo = in.nextLine();
+        endereco = endereco + "/" + codigoModelo + "/anos";
+        json = consumer.obtemDados(endereco);
+        List<Dados> anos = conversor.obterLista(json, Dados.class);
+
+        List<Veiculo> veiculos = new ArrayList<>();
+
+        for (int i = 0; i < anos.size(); i++) {
+            var enderecoAnos = endereco + "/" + anos.get(i).codigo();
+            json = consumer.obtemDados(enderecoAnos);
+
+            Veiculo veiculo = conversor.obterDados(json, Veiculo.class);
+            veiculos.add(veiculo);
+        }
+
+        System.out.println("Todos os veículos filtrados com avaliações por ano:");
+        veiculos.forEach(System.out::println);
     }
 }
